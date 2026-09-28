@@ -1,0 +1,40 @@
+# Agent Manifest — AgentRegistry entry point
+# AgentRegistry (mediator/registry/agent_registry.py) reads every key below at
+# ROOT level — do NOT nest keys under an `agent:` block. That nested shape is
+# invisible to the registry.
+# for the full contract.
+id: "CMN-C1-128"
+name: "Multi-Source Content Aggregation & Structured Knowledge Q&A Agent"
+namespace: "cmn-c1-128"
+version: "0.1.0"
+enabled: true
+category: "Cat 1"
+industry: "CMN"
+
+# Base agent type (semantic pattern; code inherits AgentBaseGraph L1-direct)
+base_type: "VectorRAGAgent"  # RAGAgent | ChatAgent | ReActAgent | DocGenerationAgent
+
+# Entry point — single dotted import path (module.Class), NOT split module:/class:.
+# AgentRegistry does `manifest["class"].rsplit(".", 1)` to get (module, class_name).
+class: "src.graph.graph.MultiSourceKnowledgeQAAgent"
+
+# Security — read-only public-facing Q&A over caller-supplied sources
+required_trust_level: "ANONYMOUS"
+
+# Deploy-time requirements (validated by the registry).
+# Inline lists on purpose: check_manifest_schema.py parses only this form and
+# reports a block list (`- item` on following lines) as not declared at all.
+#
+# Azure OpenAI rather than Anthropic: the registered environment supplies
+# AZURE_OPENAI_API_KEY / _ENDPOINT / _DEPLOYMENT, and the image ships the `openai`
+# extra — langchain_anthropic is not installed, so the previous declaration named
+# a client that could not be imported. src/services/llm_factory.py builds the
+# client from these keys at invocation time, because the Marketplace entry point
+# injects no client and a node that only accepted one never ran its LLM path.
+requires:
+  secrets: ["AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT", "AZURE_OPENAI_DEPLOYMENT"]
+  extras: ["openai"]
+
+# Runtime parameters (allowed_source_types, top_k, min_chunk_len, max_context_chunks,
+# max_retry, timeout_s, ...) live in config/config.yaml — AgentRegistry loads that
+# file separately and passes it as Graph(config=...). Do NOT put them here.

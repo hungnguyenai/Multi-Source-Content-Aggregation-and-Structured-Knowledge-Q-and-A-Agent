@@ -1,0 +1,12 @@
+# Runtime parameters.
+# The static registry manifest lives in config/agent.yaml; every runtime-tunable
+# parameter belongs here (moved out of the legacy agent.yaml `agent.config` block
+# AgentRegistry loads this file separately as Graph(config=...)).
+# Cat 1: domain behaviour is config-driven, no code assumptions.
+
+allowed_source_types: ["video", "pdf", "web", "audio", "doc"]
+top_k: 5
+min_chunk_len: 10
+max_context_chunks: 10
+max_retry: 3
+timeout_s: 30
